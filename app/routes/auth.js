@@ -19,4 +19,11 @@ router.post(
   authController.index
 )
 
+router.put(
+  '/auth/otp/:id',
+  authMiddlewares.checkId,
+  authMiddlewares.checkOtp,
+  authController.verifyOtp
+)
+
 module.exports = router

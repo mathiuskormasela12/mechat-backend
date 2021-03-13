@@ -24,16 +24,20 @@ exports.index = async (req, res) => {
 
     if (isExist.length > 0) {
       const otp = randomNumbers()
-      const data = {
-        id: isExist[0].id,
-        email: req.body.email
-      }
-      const token = jwt.sign(data, process.env.SECRET, {
-        expiresIn: '1h'
-      })
 
-      mailer(data.email, otp)
-      return response(res, 200, true, 'Authenticate Successfully, please check your email', { otp, token, id: data.id })
+      try {
+        await users.update({
+          otp
+        }, isExist[0].id)
+        mailer(req.body.email, otp)
+        return response(res, 200, true, 'Authenticate Successfully, please check your email', {
+          email: req.body.email,
+          id: isExist[0].id
+        })
+      } catch (err) {
+        console.log(err)
+        return response(res, 500, false, 'Server Error')
+      }
     } else {
       try {
         const isExist = await users.findByCondition({
@@ -54,21 +58,54 @@ exports.index = async (req, res) => {
               return response(res, 400, false, 'Failed to authenticate')
             } else {
               const otp = randomNumbers()
-              const data = {
-                id: results.insertId,
-                email: req.body.email
+              try {
+                await users.update({ otp }, results.insertId)
+                mailer(req.body.email, otp)
+                return response(res, 200, true, 'Authenticate Successfully, please check your email', {
+                  email: req.body.email,
+                  id: results.insertId
+                })
+              } catch (err) {
+                console.log(err)
+                return response(res, 500, false, 'Server Error')
               }
-              const token = jwt.sign(data, process.env.SECRET, {
-                expiresIn: '1h'
-              })
-              mailer(data.email, otp)
-              return response(res, 200, true, 'Authenticate Successfully, please check your email', { otp, token, id: data.id })
             }
           } catch (err) {
             console.log(err)
             return response(res, 500, false, 'Server Error')
           }
         }
+      } catch (err) {
+        console.log(err)
+        return response(res, 500, false, 'Server Error')
+      }
+    }
+  } catch (err) {
+    console.log(err)
+    return response(res, 500, false, 'Server Error')
+  }
+}
+
+exports.verifyOtp = async (req, res) => {
+  const { otp } = req.body
+  const { id } = req.params
+  try {
+    const isExist = await users.findByCondition({ otp, id }, 'AND')
+
+    if (isExist.length < 1) {
+      return response(res, 400, false, 'Wrong OTP')
+    } else {
+      try {
+        await users.update({ otp: null }, id)
+        const data = {
+          id: isExist[0].id,
+          email: isExist[0].email
+        }
+        const token = jwt.sign(data, process.env.SECRET, {
+          expiresIn: '1h'
+        })
+
+        return response(res, 200, true, 'Welcome to MeChat', { token })
       } catch (err) {
         console.log(err)
         return response(res, 500, false, 'Server Error')

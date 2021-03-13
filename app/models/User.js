@@ -61,6 +61,18 @@ class User extends Database {
       )
     })
   }
+
+  delete (id) {
+    return new Promise((resolve, reject) => {
+      this.db.query(`DELETE FROM ${this.table} WHERE id = ?`, id, (err, results) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(results)
+        }
+      })
+    })
+  }
 }
 
 module.exports = new User('users')

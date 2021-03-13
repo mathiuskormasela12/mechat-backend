@@ -9,6 +9,7 @@ const helmet = require('helmet')
 const compression = require('compression')
 const path = require('path')
 const socketIo = require('socket.io')
+const upload = require('express-fileupload')
 
 // setup dotenv
 dotenv.config({ path: './.env' })
@@ -22,6 +23,11 @@ const app = express()
 const whiteList = [
   'http://127.0.0.1:3000'
 ]
+
+// setup upload file
+app.use(upload({
+  createParentPath: true
+}))
 
 // setup socket.io
 const server = http.createServer(app)
