@@ -17,6 +17,24 @@ exports.checkFullname = [
   }
 ]
 
+exports.checkStatus = [
+  check('status', "Status can't be empty")
+    .notEmpty(),
+  check('status', 'Status length must must be lower than 80 character')
+    .isLength({
+      max: 81
+    }),
+  (req, res, next) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+      return response(res, 400, false, errors.array()[0].msg)
+    }
+
+    return next()
+  }
+]
+
 exports.checkId = [
   param('id', 'Invalid Id')
     .isInt(),

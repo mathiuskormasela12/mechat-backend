@@ -65,4 +65,12 @@ router.put(
   userController.upload
 )
 
+router.put(
+  '/user/status/:id',
+  authMiddlewares.isLogin,
+  userMiddlewares.checkId,
+  userMiddlewares.checkStatus,
+  userController.updateStatus
+)
+
 module.exports = router

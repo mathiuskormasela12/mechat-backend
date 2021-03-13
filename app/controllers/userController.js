@@ -144,3 +144,25 @@ exports.upload = async (req, res) => {
     }
   }
 }
+
+exports.updateStatus = async (req, res) => {
+  const data = {
+    about: req.body.status
+  }
+
+  try {
+    const results = await users.update(data, req.params.id)
+
+    if (results.affectedRows < 1) {
+      return response(res, 400, false, 'Failed to edit status')
+    } else {
+      req.socket.emit('Update_About', data.full_name)
+      return response(res, 200, true, 'Successfully to update status', {
+        status: req.body.status
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return response(res, 500, false, 'Server Error')
+  }
+}
