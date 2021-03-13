@@ -147,7 +147,7 @@ exports.upload = async (req, res) => {
 
 exports.updateStatus = async (req, res) => {
   const data = {
-    about: req.body.status
+    status: req.body.status
   }
 
   try {

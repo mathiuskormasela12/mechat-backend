@@ -42,3 +42,14 @@ exports.create = async (req, res) => {
     return response(res, 500, false, 'Server Error')
   }
 }
+
+exports.getAll = async (req, res) => {
+  try {
+    const results = await contacts.getContactCount({
+      keyword: ''
+    })
+    console.log(results)
+  } catch (err) {
+    console.log(err)
+  }
+}

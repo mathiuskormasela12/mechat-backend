@@ -21,4 +21,10 @@ router.post(
   contactController.create
 )
 
+router.get(
+  '/contact',
+  authMiddlewares.isLogin,
+  contactController.getAll
+)
+
 module.exports = router

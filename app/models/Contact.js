@@ -24,6 +24,50 @@ class User extends Database {
     })
   }
 
+  getContactCount (data) {
+    return new Promise((resolve, reject) => {
+      this.db.query(`
+        SELECT COUNT(*) AS count FROM ${this.table} as c
+         INNER JOIN users f ON f.id = c.user_id
+         INNER JOIN users u ON u.id = c.friend_id 
+         WHERE c.contact_name LIKE '%${data.keyword}%' OR 
+         f.full_name LIKE '%${data.keyword}%' OR
+         u.full_name LIKE '%${data.keyword}%' OR
+         f.email LIKE '%${data.keyword}%' OR
+         u.email LIKE '%${data.keyword}%'
+        `,
+      (err, results) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(results[0].count)
+        }
+      })
+    })
+  }
+
+  // findAll (data) {
+  //   return new Promise((resolve, reject) => {
+  //     this.db.query(`
+  //       SELECT u.full_name, u.phone_n FROM ${this.table} as c
+  //        INNER JOIN users f ON f.id = c.user_id
+  //        INNER JOIN users u ON u.id = c.friend_id
+  //        WHERE c.contact_name LIKE '%${data.keyword}%' OR
+  //        f.full_name LIKE '%${data.keyword}%' OR
+  //        u.full_name LIKE '%${data.keyword}%' OR
+  //        f.email LIKE '%${data.keyword}%' OR
+  //        u.email LIKE '%${data.keyword}%'
+  //       `,
+  //     (err, results) => {
+  //       if (err) {
+  //         return reject(err)
+  //       } else {
+  //         return resolve(results)
+  //       }
+  //     })
+  //   })
+  // }
+
   create (data) {
     return new Promise((resolve, reject) => {
       this.db.query(
