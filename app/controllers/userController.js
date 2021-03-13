@@ -156,7 +156,7 @@ exports.updateStatus = async (req, res) => {
     if (results.affectedRows < 1) {
       return response(res, 400, false, 'Failed to edit status')
     } else {
-      req.socket.emit('Update_About', data.full_name)
+      req.socket.emit('Update_Status', data.full_name)
       return response(res, 200, true, 'Successfully to update status', {
         status: req.body.status
       })
