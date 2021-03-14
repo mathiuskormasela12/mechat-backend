@@ -57,7 +57,8 @@ exports.getAll = async (req, res) => {
       const modifiedResults = results.map(item => ({
         ...item,
         time: moment(item.createdAt).format('HH:mm'),
-        date: moment(item.createdAt).format('D MMM YYYY')
+        date: moment(item.createdAt).format('D MMM YYYY'),
+        mine: (Number(req.data.id) === Number(item.user_id))
       }))
       return response(res, 200, true, 'Successfully to get all chats', modifiedResults, totalData, totalPages, page, req)
     }
