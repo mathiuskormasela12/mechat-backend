@@ -102,7 +102,7 @@ exports.verifyOtp = async (req, res) => {
           email: isExist[0].email
         }
         const token = jwt.sign(data, process.env.SECRET, {
-          expiresIn: '1h'
+          expiresIn: '24h'
         })
 
         return response(res, 200, true, 'Welcome to MeChat', { token })

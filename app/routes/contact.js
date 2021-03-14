@@ -24,6 +24,7 @@ router.post(
 router.get(
   '/contact',
   authMiddlewares.isLogin,
+  contactMiddlewares.isGetContactListValid,
   contactController.getAll
 )
 

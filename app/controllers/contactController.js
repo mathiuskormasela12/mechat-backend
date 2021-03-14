@@ -6,6 +6,8 @@ const response = require('../helpers/response')
 const contacts = require('../models/Contact')
 const users = require('../models/User')
 
+const { PHOTO_URL } = process.env
+
 exports.create = async (req, res) => {
   const { phoneNumber, contactName } = req.body
 
@@ -44,11 +46,35 @@ exports.create = async (req, res) => {
 }
 
 exports.getAll = async (req, res) => {
+  const {
+    page = 1,
+    search = '',
+    limit = 7
+  } = req.query
+
   try {
-    const results = await contacts.getContactCount({
-      keyword: ''
+    const startData = (limit * page) - limit
+    const totalData = await contacts.getContactCount({
+      keyword: '',
+      id: req.data.id
     })
-    console.log(results)
+    const totalPages = Math.ceil(totalData / limit)
+    const results = await contacts.findAll({
+      keyword: search,
+      offset: startData,
+      limit,
+      id: req.data.id
+    })
+
+    if (results.length < 1) {
+      return response(res, 400, false, 'Contact not availabled', [], totalData, totalPages, page, req)
+    } else {
+      const modifiedResults = results.map(item => ({
+        ...item,
+        picture: PHOTO_URL.concat(`/${item.picture}`)
+      }))
+      return response(res, 200, true, 'Successfully to get all contacts', modifiedResults, totalData, totalPages, page, req)
+    }
   } catch (err) {
     console.log(err)
   }

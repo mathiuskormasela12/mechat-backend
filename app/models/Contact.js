@@ -28,13 +28,14 @@ class User extends Database {
     return new Promise((resolve, reject) => {
       this.db.query(`
         SELECT COUNT(*) AS count FROM ${this.table} as c
-         INNER JOIN users f ON f.id = c.user_id
-         INNER JOIN users u ON u.id = c.friend_id 
-         WHERE c.contact_name LIKE '%${data.keyword}%' OR 
-         f.full_name LIKE '%${data.keyword}%' OR
-         u.full_name LIKE '%${data.keyword}%' OR
-         f.email LIKE '%${data.keyword}%' OR
-         u.email LIKE '%${data.keyword}%'
+        INNER JOIN users u ON u.id = c.user_id
+        INNER JOIN users f ON f.id = c.friend_id 
+        WHERE (u.id = ${data.id}) AND 
+        (c.contact_name LIKE '%${data.keyword}%' OR 
+        f.full_name LIKE '%${data.keyword}%' OR
+        u.full_name LIKE '%${data.keyword}%' OR
+        f.email LIKE '%${data.keyword}%' OR
+        u.email LIKE '%${data.keyword}%')
         `,
       (err, results) => {
         if (err) {
@@ -46,27 +47,32 @@ class User extends Database {
     })
   }
 
-  // findAll (data) {
-  //   return new Promise((resolve, reject) => {
-  //     this.db.query(`
-  //       SELECT u.full_name, u.phone_n FROM ${this.table} as c
-  //        INNER JOIN users f ON f.id = c.user_id
-  //        INNER JOIN users u ON u.id = c.friend_id
-  //        WHERE c.contact_name LIKE '%${data.keyword}%' OR
-  //        f.full_name LIKE '%${data.keyword}%' OR
-  //        u.full_name LIKE '%${data.keyword}%' OR
-  //        f.email LIKE '%${data.keyword}%' OR
-  //        u.email LIKE '%${data.keyword}%'
-  //       `,
-  //     (err, results) => {
-  //       if (err) {
-  //         return reject(err)
-  //       } else {
-  //         return resolve(results)
-  //       }
-  //     })
-  //   })
-  // }
+  findAll (data) {
+    return new Promise((resolve, reject) => {
+      this.db.query(`
+        SELECT c.id, c.contact_name, 
+        f.status, f.picture AS picture 
+        FROM ${this.table} as c
+        INNER JOIN users u ON u.id = c.user_id
+        INNER JOIN users f ON f.id = c.friend_id 
+        WHERE (u.id = ${data.id}) AND 
+        (c.contact_name LIKE '%${data.keyword}%' OR 
+        f.full_name LIKE '%${data.keyword}%' OR
+        u.full_name LIKE '%${data.keyword}%' OR
+        f.email LIKE '%${data.keyword}%' OR
+        u.email LIKE '%${data.keyword}%')
+        ORDER BY c.contact_name ASC
+        LIMIT ${data.offset}, ${data.limit};
+        `,
+      (err, results) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(results)
+        }
+      })
+    })
+  }
 
   create (data) {
     return new Promise((resolve, reject) => {

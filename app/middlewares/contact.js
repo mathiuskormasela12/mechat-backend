@@ -3,6 +3,25 @@
 const response = require('../helpers/response')
 const { check, validationResult, param } = require('express-validator')
 
+exports.isGetContactListValid = (req, res, next) => {
+  const {
+    page = 1,
+    limit = 7
+  } = req.query
+
+  if (req.query.page && page.match(/[^0-9]/gi) !== null) {
+    return response(res, 400, false, 'Invalid page')
+  } else if (req.query.page && page < 1) {
+    return response(res, 400, false, 'Invalid page')
+  } else if (req.query.limit && typeof limit !== 'number' && limit < 1) {
+    return response(res, 400, false, 'Invalid limit')
+  } else if (req.query.limit && limit.toString().match(/[^0-9]/gi) !== null) {
+    return response(res, 400, false, 'Invalid limit')
+  }
+
+  return next()
+}
+
 exports.checkContactName = [
   check('contactName', "Contact name can't be empty")
     .notEmpty(),
