@@ -29,4 +29,11 @@ router.get(
   chatController.getAll
 )
 
+router.get(
+  '/history',
+  authMiddlewares.isLogin,
+  chatMiddlewares.isGetChatListValid,
+  chatController.getChatList
+)
+
 module.exports = router

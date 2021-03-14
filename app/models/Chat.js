@@ -68,6 +68,67 @@ class Chat extends Database {
     })
   }
 
+  getChatList (data) {
+    return new Promise((resolve, reject) => {
+      this.db.query(`
+        SELECT c.user_id, c.friend_id, c.contact_name, u.picture, m.createdAt AS time
+        FROM messages m 
+        INNER JOIN contacts c ON c.friend_id = m.friend_id
+        INNER JOIN users u ON u.id = m.friend_id
+        WHERE m.user_id = ${data.id} AND
+        c.contact_name LIKE '%${data.keyword}%'
+        GROUP BY m.user_id, m.friend_id
+        ORDER BY m.createdAt ASC
+        LIMIT ${data.offset}, ${data.limit}
+      `,
+      (err, results) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(results)
+        }
+      })
+    })
+  }
+
+  getChatListCount (data) {
+    return new Promise((resolve, reject) => {
+      this.db.query(`
+        SELECT COUNT(*) AS count
+        FROM messages m 
+        INNER JOIN contacts c ON c.friend_id = m.friend_id
+        INNER JOIN users u ON u.id = m.friend_id
+        WHERE m.user_id = ${data.id} AND
+        c.contact_name LIKE '%${data.keyword}%'
+        GROUP BY m.user_id, m.friend_id
+      `,
+      (err, results) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(results.length)
+        }
+      })
+    })
+  }
+
+  getLatestChat () {
+    return new Promise((resolve, reject) => {
+      this.db.query(`
+        SELECT id, user_id, friend_id, message
+        FROM ${this.table} 
+        ORDER BY createdAt DESC;
+      `,
+      (err, results) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(results)
+        }
+      })
+    })
+  }
+
   create (data) {
     return new Promise((resolve, reject) => {
       this.db.query(

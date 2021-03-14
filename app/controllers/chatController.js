@@ -66,3 +66,45 @@ exports.getAll = async (req, res) => {
     console.log(err)
   }
 }
+
+exports.getChatList = async (req, res) => {
+  const {
+    page = 1,
+    search = '',
+    limit = 7
+  } = req.query
+  const { friendId } = req.params
+
+  try {
+    const startData = (limit * page) - limit
+    const totalData = await chats.getChatListCount({
+      keyword: '',
+      id: req.data.id,
+      friendId
+    })
+    const totalPages = Math.ceil(totalData / limit)
+    const results = await chats.getChatList({
+      keyword: search,
+      offset: startData,
+      limit,
+      id: req.data.id
+    })
+    const latest = await chats.getLatestChat()
+
+    if (results.length < 1 || latest.length < 1) {
+      return response(res, 400, false, 'Chat List not availabled', [], totalData, totalPages, page, req)
+    } else {
+      const modifiedResults = results.map(item => ({
+        ...item,
+        message: latest.length === 1
+          ? latest[0].message
+          : latest.filter((items) => {
+            return item.friend_id === items.friend_id
+          }).map(item => item.message).shift()
+      }))
+      return response(res, 200, true, 'Successfully to get all chats', modifiedResults, totalData, totalPages, page, req)
+    }
+  } catch (err) {
+    console.log(err)
+  }
+}
