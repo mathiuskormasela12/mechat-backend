@@ -71,6 +71,7 @@ app.use(cors(corsOptions))
 app.use('/api/v1', require('./app/routes/auth'))
 app.use('/api/v1', require('./app/routes/user'))
 app.use('/api/v1', require('./app/routes/contact'))
+app.use('/api/v1', require('./app/routes/chat'))
 
 server.listen(PORT, () => {
   console.log(`Web Service running at http://127.0.0.1:${PORT}`)

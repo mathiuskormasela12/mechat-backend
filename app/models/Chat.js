@@ -2,7 +2,7 @@
 // import all modules
 const Database = require('../core/Database')
 
-class Contact extends Database {
+class Chat extends Database {
   constructor (table) {
     super()
     this.table = table
@@ -24,19 +24,17 @@ class Contact extends Database {
     })
   }
 
-  getContactCount (data) {
+  getChatCount (data) {
     return new Promise((resolve, reject) => {
       this.db.query(`
-        SELECT COUNT(*) AS count FROM ${this.table} as c
-        INNER JOIN users u ON u.id = c.user_id
-        INNER JOIN users f ON f.id = c.friend_id 
-        WHERE (u.id = ${data.id}) AND 
-        (c.contact_name LIKE '%${data.keyword}%' OR 
-        f.full_name LIKE '%${data.keyword}%' OR
-        u.full_name LIKE '%${data.keyword}%' OR
-        f.email LIKE '%${data.keyword}%' OR
-        u.email LIKE '%${data.keyword}%')
-        `,
+        SELECT COUNT(m.message) AS count 
+        FROM messages m 
+        INNER JOIN users u ON m.user_id = u.id 
+        INNER JOIN users f ON m.friend_id = f.id 
+        WHERE (m.user_id = ${data.id} AND m.friend_id = ${data.friendId}) 
+        OR (m.user_id = ${data.friendId} AND m.friend_id = ${data.id})
+        AND (m.message LIKE '%${data.keyword}%') 
+      `,
       (err, results) => {
         if (err) {
           return reject(err)
@@ -50,20 +48,16 @@ class Contact extends Database {
   findAll (data) {
     return new Promise((resolve, reject) => {
       this.db.query(`
-        SELECT c.id, c.contact_name, 
-        f.status, f.picture AS picture 
-        FROM ${this.table} as c
-        INNER JOIN users u ON u.id = c.user_id
-        INNER JOIN users f ON f.id = c.friend_id 
-        WHERE (u.id = ${data.id}) AND 
-        (c.contact_name LIKE '%${data.keyword}%' OR 
-        f.full_name LIKE '%${data.keyword}%' OR
-        u.full_name LIKE '%${data.keyword}%' OR
-        f.email LIKE '%${data.keyword}%' OR
-        u.email LIKE '%${data.keyword}%')
-        ORDER BY c.contact_name ASC
+        SELECT m.id, m.user_id, m.friend_id, m.message 
+        FROM messages m 
+        INNER JOIN users u ON m.user_id = u.id 
+        INNER JOIN users f ON m.friend_id = f.id 
+        WHERE ((m.user_id = ${data.id} AND m.friend_id = ${data.friendId}) 
+        OR (m.user_id = ${data.friendId} AND m.friend_id = ${data.id}))
+        AND (m.message LIKE '%${data.keyword}%') 
+        ORDER BY m.createdAt DESC
         LIMIT ${data.offset}, ${data.limit};
-        `,
+      `,
       (err, results) => {
         if (err) {
           return reject(err)
@@ -125,4 +119,4 @@ class Contact extends Database {
   }
 }
 
-module.exports = new Contact('contacts')
+module.exports = new Chat('messages')
