@@ -105,7 +105,7 @@ exports.verifyOtp = async (req, res) => {
           expiresIn: '24h'
         })
 
-        return response(res, 200, true, 'Welcome to MeChat', { token })
+        return response(res, 200, true, 'Welcome to MeChat', { token, fullName: isExist[0].full_name })
       } catch (err) {
         console.log(err)
         return response(res, 500, false, 'Server Error')

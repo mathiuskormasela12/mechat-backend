@@ -17,7 +17,7 @@ exports.updateFullName = async (req, res) => {
     if (results.affectedRows < 1) {
       return response(res, 400, false, 'Failed to add full name')
     } else {
-      req.socket.emit('Update_Profile', data.full_name)
+      req.socket.emit(`Update_Profile_${req.params.id}`, data.full_name)
       return response(res, 200, true, 'Successfuly to update fullname', {
         fullName: req.body.fullName
       })
@@ -39,7 +39,7 @@ exports.updateAbout = async (req, res) => {
     if (results.affectedRows < 1) {
       return response(res, 400, false, 'Failed to edit about')
     } else {
-      req.socket.emit('Update_Profile', data.full_name)
+      req.socket.emit(`Update_Profile_${req.params.id}`, data.about)
       return response(res, 200, true, 'Successfully to update about', {
         about: req.body.about
       })
@@ -61,7 +61,7 @@ exports.updatePhoneNumber = async (req, res) => {
     if (results.affectedRows < 1) {
       return response(res, 400, false, 'Failed to edit phone number')
     } else {
-      req.socket.emit('Update_Profile', data.phone_number)
+      req.socket.emit(`Update_Profile_${req.params.id}`, data.phone_number)
       return response(res, 200, true, 'Successfuly to update phone number', {
         phoneNumber: req.body.phoneNumber
       })
@@ -83,7 +83,7 @@ exports.updateEmail = async (req, res) => {
     if (results.affectedRows < 1) {
       return response(res, 400, false, 'Failed to edit email')
     } else {
-      req.socket.emit('Update_Profile', data.email)
+      req.socket.emit(`Update_Profile_${req.params.id}`, data.email)
       return response(res, 200, true, 'Successfuly to update email', {
         email: req.body.email
       })
@@ -116,11 +116,19 @@ exports.getUserById = async (req, res) => {
     if (results.length < 1) {
       return response(res, 400, false, 'User not found', [])
     } else {
-      const data = {
-        ...results[0],
-        picture: process.env.PHOTO_URL.concat('/', results[0].picture)
+      // const data = {
+      //   ...results[0],
+      //   picture: process.env.PHOTO_URL.concat('/', results[0].picture)
+      // }
+      const data = {}
+      for (const prop in results[0]) {
+        data[prop] = unescape(results[0][prop])
       }
-      return response(res, 200, true, 'Successfuly to get user', data)
+      const modifiedData = {
+        ...data,
+        picture: process.env.PHOTO_URL.concat('/', data.picture)
+      }
+      return response(res, 200, true, 'Successfuly to get user', modifiedData)
     }
   } catch (err) {
     console.log(err)
@@ -136,7 +144,7 @@ exports.upload = async (req, res) => {
   } else {
     try {
       await users.update({ picture }, req.params.id)
-      req.socket.emit('Update_Profile', picture)
+      req.socket.emit(`Update_Profile_${req.params.id}`, picture)
       return response(res, 200, true, 'Successfuly to update user profile')
     } catch (err) {
       console.log(err)
@@ -156,7 +164,7 @@ exports.updateStatus = async (req, res) => {
     if (results.affectedRows < 1) {
       return response(res, 400, false, 'Failed to edit status')
     } else {
-      req.socket.emit('Update_Profile', data.full_name)
+      req.socket.emit(`Update_Profile_${req.params.id}`, data.full_name)
       return response(res, 200, true, 'Successfully to update status', {
         status: req.body.status
       })

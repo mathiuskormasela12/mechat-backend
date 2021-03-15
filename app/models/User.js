@@ -13,7 +13,10 @@ class User extends Database {
       this.db.query(`
         SELECT * FROM ${this.table} 
         WHERE ${Object.keys(data).map((item, index) =>
-        `${item} = '${Object.values(data)[index]}'`).join(` ${operator} `)}`,
+        `${item} = '${String(Object.values(data)[index]).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}'`).join(` ${operator} `)}`,
       (err, results) => {
         if (err) {
           return reject(err)
@@ -29,7 +32,10 @@ class User extends Database {
       this.db.query(
         `
         INSERT INTO ${this.table}(${Object.keys(data).map(item => `${item}`)}) 
-        VALUES (${Object.values(data).map(item => `'${item}'`).join(',')})
+        VALUES (${Object.values(data).map(item => `'${String(item).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}'`).join(',')})
         `,
         (err, results) => {
           if (err) {
@@ -48,7 +54,10 @@ class User extends Database {
         `
           UPDATE ${this.table} 
           SET ${Object.keys(data).map((item, index) =>
-          `${item} = '${Object.values(data)[index]}'`)
+          `${item} = '${String(Object.values(data)[index]).replace(/\\/g, '\\\\')
+          .replace(/\$/g, '\\$')
+          .replace(/'/g, "\\'")
+          .replace(/"/g, '\\"')}'`)
           .join()} WHERE id = ?`,
         id,
         (err, results) => {

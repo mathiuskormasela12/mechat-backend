@@ -13,7 +13,10 @@ class Chat extends Database {
       this.db.query(`
         SELECT * FROM ${this.table} 
         WHERE ${Object.keys(data).map((item, index) =>
-        `${item} = '${Object.values(data)[index]}'`).join(` ${operator} `)}`,
+        `${item} = '${String(Object.values(data)[index]).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}'`).join(` ${operator} `)}`,
       (err, results) => {
         if (err) {
           return reject(err)
@@ -33,7 +36,10 @@ class Chat extends Database {
         INNER JOIN users f ON m.friend_id = f.id 
         WHERE (m.user_id = ${data.id} AND m.friend_id = ${data.friendId}) 
         OR (m.user_id = ${data.friendId} AND m.friend_id = ${data.id})
-        AND (m.message LIKE '%${data.keyword}%') 
+        AND (m.message LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%') 
       `,
       (err, results) => {
         if (err) {
@@ -54,7 +60,10 @@ class Chat extends Database {
         INNER JOIN users f ON m.friend_id = f.id 
         WHERE ((m.user_id = ${data.id} AND m.friend_id = ${data.friendId}) 
         OR (m.user_id = ${data.friendId} AND m.friend_id = ${data.id}))
-        AND (m.message LIKE '%${data.keyword}%') 
+        AND (m.message LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%') 
         ORDER BY m.createdAt DESC
         LIMIT ${data.offset}, ${data.limit};
       `,
@@ -76,7 +85,10 @@ class Chat extends Database {
         INNER JOIN contacts c ON c.friend_id = m.friend_id
         INNER JOIN users u ON u.id = m.friend_id
         WHERE m.user_id = ${data.id} AND
-        c.contact_name LIKE '%${data.keyword}%'
+        c.contact_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%'
         GROUP BY m.user_id, m.friend_id
         ORDER BY m.createdAt ASC
         LIMIT ${data.offset}, ${data.limit}
@@ -99,7 +111,10 @@ class Chat extends Database {
         INNER JOIN contacts c ON c.friend_id = m.friend_id
         INNER JOIN users u ON u.id = m.friend_id
         WHERE m.user_id = ${data.id} AND
-        c.contact_name LIKE '%${data.keyword}%'
+        c.contact_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%'
         GROUP BY m.user_id, m.friend_id
       `,
       (err, results) => {
@@ -134,7 +149,10 @@ class Chat extends Database {
       this.db.query(
         `
         INSERT INTO ${this.table}(${Object.keys(data).map(item => `${item}`)}) 
-        VALUES (${Object.values(data).map(item => `'${item}'`).join(',')})
+        VALUES (${Object.values(data).map(item => `'${String(item).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}'`).join(',')})
         `,
         (err, results) => {
           if (err) {
@@ -153,7 +171,10 @@ class Chat extends Database {
         `
           UPDATE ${this.table} 
           SET ${Object.keys(data).map((item, index) =>
-          `${item} = '${Object.values(data)[index]}'`)
+          `${item} = '${String(Object.values(data)[index]).replace(/\\/g, '\\\\')
+          .replace(/\$/g, '\\$')
+          .replace(/'/g, "\\'")
+          .replace(/"/g, '\\"')}'`)
           .join()} WHERE id = ?`,
         id,
         (err, results) => {

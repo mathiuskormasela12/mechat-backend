@@ -13,7 +13,10 @@ class Contact extends Database {
       this.db.query(`
         SELECT * FROM ${this.table} 
         WHERE ${Object.keys(data).map((item, index) =>
-        `${item} = '${Object.values(data)[index]}'`).join(` ${operator} `)}`,
+        `${item} = '${String(Object.values(data)[index]).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}'`).join(` ${operator} `)}`,
       (err, results) => {
         if (err) {
           return reject(err)
@@ -31,11 +34,26 @@ class Contact extends Database {
         INNER JOIN users u ON u.id = c.user_id
         INNER JOIN users f ON f.id = c.friend_id 
         WHERE (u.id = ${data.id}) AND 
-        (c.contact_name LIKE '%${data.keyword}%' OR 
-        f.full_name LIKE '%${data.keyword}%' OR
-        u.full_name LIKE '%${data.keyword}%' OR
-        f.email LIKE '%${data.keyword}%' OR
-        u.email LIKE '%${data.keyword}%')
+        (c.contact_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%' OR 
+        f.full_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%' OR
+        u.full_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%' OR
+        f.email LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%' OR
+        u.email LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%')
         `,
       (err, results) => {
         if (err) {
@@ -56,11 +74,26 @@ class Contact extends Database {
         INNER JOIN users u ON u.id = c.user_id
         INNER JOIN users f ON f.id = c.friend_id 
         WHERE (u.id = ${data.id}) AND 
-        (c.contact_name LIKE '%${data.keyword}%' OR 
-        f.full_name LIKE '%${data.keyword}%' OR
-        u.full_name LIKE '%${data.keyword}%' OR
-        f.email LIKE '%${data.keyword}%' OR
-        u.email LIKE '%${data.keyword}%')
+        (c.contact_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%' OR 
+        f.full_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%' OR
+        u.full_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%' OR
+        f.email LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%' OR
+        u.email LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}%')
         ORDER BY c.contact_name ASC
         LIMIT ${data.offset}, ${data.limit};
         `,
@@ -79,7 +112,10 @@ class Contact extends Database {
       this.db.query(
         `
         INSERT INTO ${this.table}(${Object.keys(data).map(item => `${item}`)}) 
-        VALUES (${Object.values(data).map(item => `'${item}'`).join(',')})
+        VALUES (${Object.values(data).map(item => `'${String(item).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}'`).join(',')})
         `,
         (err, results) => {
           if (err) {
@@ -98,7 +134,10 @@ class Contact extends Database {
         `
           UPDATE ${this.table} 
           SET ${Object.keys(data).map((item, index) =>
-          `${item} = '${Object.values(data)[index]}'`)
+          `${item} = '${String(Object.values(data)[index]).replace(/\\/g, '\\\\')
+          .replace(/\$/g, '\\$')
+          .replace(/'/g, "\\'")
+          .replace(/"/g, '\\"')}'`)
           .join()} WHERE id = ?`,
         id,
         (err, results) => {
