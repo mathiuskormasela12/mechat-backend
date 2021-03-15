@@ -94,7 +94,7 @@ class Contact extends Database {
         .replace(/\$/g, '\\$')
         .replace(/'/g, "\\'")
         .replace(/"/g, '\\"')}%')
-        ORDER BY c.contact_name ASC
+        ORDER BY c.${data.by} ${data.sort}
         LIMIT ${data.offset}, ${data.limit};
         `,
       (err, results) => {

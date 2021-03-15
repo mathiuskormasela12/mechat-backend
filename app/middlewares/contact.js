@@ -6,8 +6,15 @@ const { check, validationResult, param } = require('express-validator')
 exports.isGetContactListValid = (req, res, next) => {
   const {
     page = 1,
-    limit = 7
+    limit = 7,
+    sort = 'ASC',
+    by = 'contact_name'
   } = req.query
+
+  const validSort = [
+    'contact_name',
+    'createdAt'
+  ]
 
   if (req.query.page && page.match(/[^0-9]/gi) !== null) {
     return response(res, 400, false, 'Invalid page')
@@ -17,6 +24,10 @@ exports.isGetContactListValid = (req, res, next) => {
     return response(res, 400, false, 'Invalid limit')
   } else if (req.query.limit && limit.toString().match(/[^0-9]/gi) !== null) {
     return response(res, 400, false, 'Invalid limit')
+  } else if (req.query.sort && sort.toUpperCase() !== 'ASC' && sort.toUpperCase() !== 'DESC') {
+    return response(res, 400, false, 'Invalid sort')
+  } else if (req.query.by && validSort.indexOf(by) === -1) {
+    return response(res, 400, false, 'Invalid query')
   }
 
   return next()

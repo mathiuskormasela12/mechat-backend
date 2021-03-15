@@ -50,7 +50,9 @@ exports.getAll = async (req, res) => {
   const {
     page = 1,
     search = '',
-    limit = 7
+    limit = 7,
+    sort = 'ASC',
+    by = 'contact_name'
   } = req.query
 
   try {
@@ -64,7 +66,9 @@ exports.getAll = async (req, res) => {
       keyword: search,
       offset: startData,
       limit,
-      id: req.data.id
+      id: req.data.id,
+      by,
+      sort
     })
 
     if (results.length < 1) {
