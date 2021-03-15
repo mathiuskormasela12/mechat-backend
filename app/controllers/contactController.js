@@ -33,6 +33,7 @@ exports.create = async (req, res) => {
         if (results.affectedRows < 1) {
           return response(res, 400, false, 'Failed to add new contact')
         } else {
+          req.socket.emit(`Update_Contact_${req.data.id}`, contactName)
           return response(res, 200, true, 'Sucessfully to add new contact')
         }
       }
