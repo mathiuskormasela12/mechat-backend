@@ -18,8 +18,9 @@ exports.create = async (req, res) => {
 
     if (data.length > 0) {
       const isExist = await contacts.findByCondition({
-        friend_id: data[0].id
-      })
+        friend_id: data[0].id,
+        user_id: req.data.id
+      }, 'AND')
 
       if (isExist.length > 0) {
         return response(res, 400, false, 'Contact is exists')
