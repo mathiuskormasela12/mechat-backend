@@ -28,4 +28,11 @@ router.get(
   contactController.getAll
 )
 
+router.get(
+  '/contact/:id',
+  authMiddlewares.isLogin,
+  contactMiddlewares.checkId,
+  contactController.getContactById
+)
+
 module.exports = router

@@ -85,3 +85,25 @@ exports.getAll = async (req, res) => {
     console.log(err)
   }
 }
+
+exports.getContactById = async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const results = await contacts.findByConditionRelation({
+      id
+    }, '')
+
+    if (results.length < 1) {
+      return response(res, 400, false, 'Contact not availabled', [])
+    } else {
+      const modifiedResults = {
+        ...results[0],
+        picture: PHOTO_URL.concat(`/${results[0].picture}`)
+      }
+      return response(res, 200, true, 'Successfully to get all contacts', modifiedResults)
+    }
+  } catch (err) {
+    console.log(err)
+  }
+}

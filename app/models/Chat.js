@@ -54,7 +54,7 @@ class Chat extends Database {
   findAll (data) {
     return new Promise((resolve, reject) => {
       this.db.query(`
-        SELECT m.id, m.user_id, m.friend_id, m.message 
+        SELECT m.id, m.user_id, m.friend_id, m.message, m.createdAt
         FROM messages m 
         INNER JOIN users u ON m.user_id = u.id 
         INNER JOIN users f ON m.friend_id = f.id 
@@ -80,7 +80,7 @@ class Chat extends Database {
   getChatList (data) {
     return new Promise((resolve, reject) => {
       this.db.query(`
-        SELECT c.user_id, c.friend_id, c.contact_name, u.picture, m.createdAt AS time
+        SELECT c.id, c.user_id, c.friend_id, c.contact_name, u.picture, m.createdAt AS time
         FROM messages m 
         INNER JOIN contacts c ON c.friend_id = m.friend_id
         INNER JOIN users u ON u.id = m.friend_id
@@ -90,7 +90,7 @@ class Chat extends Database {
         .replace(/'/g, "\\'")
         .replace(/"/g, '\\"')}%'
         GROUP BY m.user_id, m.friend_id
-        ORDER BY m.createdAt ASC
+        ORDER BY c.contact_name ${data.sort}
         LIMIT ${data.offset}, ${data.limit}
       `,
       (err, results) => {
@@ -130,7 +130,7 @@ class Chat extends Database {
   getLatestChat () {
     return new Promise((resolve, reject) => {
       this.db.query(`
-        SELECT id, user_id, friend_id, message
+        SELECT id, user_id, friend_id, message, createdAt
         FROM ${this.table} 
         ORDER BY createdAt DESC;
       `,

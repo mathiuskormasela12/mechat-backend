@@ -31,7 +31,7 @@ exports.getAll = async (req, res) => {
   const {
     page = 1,
     search = '',
-    limit = 7
+    limit = 10
   } = req.query
   const { friendId } = req.params
 
@@ -60,6 +60,7 @@ exports.getAll = async (req, res) => {
         date: moment(item.createdAt).format('D MMM YYYY'),
         mine: (Number(req.data.id) === Number(item.user_id))
       }))
+      console.log(results)
       return response(res, 200, true, 'Successfully to get all chats', modifiedResults, totalData, totalPages, page, req)
     }
   } catch (err) {
@@ -71,7 +72,8 @@ exports.getChatList = async (req, res) => {
   const {
     page = 1,
     search = '',
-    limit = 7
+    limit = 7,
+    sort = 'ASC'
   } = req.query
   const { friendId } = req.params
 
@@ -87,7 +89,8 @@ exports.getChatList = async (req, res) => {
       keyword: search,
       offset: startData,
       limit,
-      id: req.data.id
+      id: req.data.id,
+      sort
     })
     const latest = await chats.getLatestChat()
 
@@ -96,11 +99,17 @@ exports.getChatList = async (req, res) => {
     } else {
       const modifiedResults = results.map(item => ({
         ...item,
+        picture: process.env.PHOTO_URL.concat(`/${item.picture}`),
         message: latest.length === 1
           ? latest[0].message
           : latest.filter((items) => {
-            return item.friend_id === items.friend_id
-          }).map(item => item.message).shift()
+            return item.friend_id === items.user_id || item.friend_id === items.friend_id
+          }).map(item => item.message).shift(),
+        createdAt: latest.length === 1
+          ? latest[0].createdAt
+          : latest.filter((items) => {
+            return item.friend_id === items.user_id || item.friend_id === items.friend_id
+          }).map(item => moment(item.createdAt).format('HH:mm')).shift()
       }))
       return response(res, 200, true, 'Successfully to get all chats', modifiedResults, totalData, totalPages, page, req)
     }

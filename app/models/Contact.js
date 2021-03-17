@@ -27,6 +27,27 @@ class Contact extends Database {
     })
   }
 
+  findByConditionRelation (data, operator) {
+    return new Promise((resolve, reject) => {
+      this.db.query(`
+        SELECT contacts.id, contacts.contact_name, 
+        users.picture FROM ${this.table} 
+        INNER JOIN users ON users.id = ${this.table}.friend_id
+        WHERE ${Object.keys(data).map((item, index) =>
+        `contacts.${item} = '${String(Object.values(data)[index]).replace(/\\/g, '\\\\')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')}'`).join(` ${operator} `)}`,
+      (err, results) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(results)
+        }
+      })
+    })
+  }
+
   getContactCount (data) {
     return new Promise((resolve, reject) => {
       this.db.query(`
@@ -68,7 +89,7 @@ class Contact extends Database {
   findAll (data) {
     return new Promise((resolve, reject) => {
       this.db.query(`
-        SELECT c.id, c.contact_name, 
+        SELECT c.id, f.id AS friend_id, c.contact_name, 
         f.status, f.picture AS picture 
         FROM ${this.table} as c
         INNER JOIN users u ON u.id = c.user_id
