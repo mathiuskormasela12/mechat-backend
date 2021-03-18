@@ -18,7 +18,7 @@ exports.create = async (req, res) => {
     if (results.affectedRows < 1) {
       return response(res, 400, false, 'Failed to send message')
     } else {
-      req.socket.emit('Send_Message', req.body)
+      req.socket.emit(`Send_Message_${req.body.friendId}`, req.body)
       return response(res, 200, true, 'Sucessfully to send message')
     }
   } catch (err) {
