@@ -73,7 +73,7 @@ exports.getChatList = async (req, res) => {
     page = 1,
     search = '',
     limit = 7,
-    sort = 'ASC'
+    sort = 'DESC'
   } = req.query
   const { friendId } = req.params
 
@@ -92,24 +92,13 @@ exports.getChatList = async (req, res) => {
       id: req.data.id,
       sort
     })
-    const latest = await chats.getLatestChat()
 
-    if (results.length < 1 || latest.length < 1) {
+    if (results.length < 1) {
       return response(res, 400, false, 'Chat List not availabled', [], totalData, totalPages, page, req)
     } else {
       const modifiedResults = results.map(item => ({
         ...item,
-        picture: process.env.PHOTO_URL.concat(`/${item.picture}`),
-        message: latest.length === 1
-          ? latest[0].message
-          : latest.filter((items) => {
-            return item.friend_id === items.user_id || item.friend_id === items.friend_id
-          }).map(item => item.message).shift(),
-        createdAt: latest.length === 1
-          ? latest[0].createdAt
-          : latest.filter((items) => {
-            return item.friend_id === items.user_id || item.friend_id === items.friend_id
-          }).map(item => moment(item.createdAt).format('HH:mm')).shift()
+        picture: process.env.PHOTO_URL.concat(`/${item.picture}`)
       }))
       return response(res, 200, true, 'Successfully to get all chats', modifiedResults, totalData, totalPages, page, req)
     }

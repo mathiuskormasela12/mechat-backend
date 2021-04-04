@@ -80,17 +80,21 @@ class Chat extends Database {
   getChatList (data) {
     return new Promise((resolve, reject) => {
       this.db.query(`
-        SELECT c.id, c.user_id, c.friend_id, c.contact_name, u.picture, m.createdAt AS time
-        FROM messages m 
-        INNER JOIN contacts c ON c.friend_id = m.friend_id
-        INNER JOIN users u ON u.id = m.friend_id
-        WHERE m.user_id = ${data.id} AND
+        SELECT c.contact_name, f.picture, m.message FROM contacts c
+        INNER JOIN users f ON f.id = c.friend_id
+        INNER JOIN messages m ON (m.user_id = c.friend_id OR m.friend_id = c.friend_id)
+        WHERE m.id IN (
+          SELECT MAX(mx.id) FROM contacts cx
+          INNER JOIN messages mx ON (mx.user_id = cx.friend_id OR mx.friend_id = cx.friend_id)
+          GROUP BY cx.contact_name
+        )
+        AND c.user_id = ${data.id} AND
         c.contact_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
         .replace(/\$/g, '\\$')
         .replace(/'/g, "\\'")
         .replace(/"/g, '\\"')}%'
         GROUP BY m.user_id, m.friend_id
-        ORDER BY c.contact_name ${data.sort}
+        ORDER BY m.createdAt ${data.sort}
         LIMIT ${data.offset}, ${data.limit}
       `,
       (err, results) => {
@@ -106,11 +110,15 @@ class Chat extends Database {
   getChatListCount (data) {
     return new Promise((resolve, reject) => {
       this.db.query(`
-        SELECT COUNT(*) AS count
-        FROM messages m 
-        INNER JOIN contacts c ON c.friend_id = m.friend_id
-        INNER JOIN users u ON u.id = m.friend_id
-        WHERE m.user_id = ${data.id} AND
+        SELECT COUNT(*) AS count FROM contacts c
+        INNER JOIN users f ON f.id = c.friend_id
+        INNER JOIN messages m ON (m.user_id = c.friend_id OR m.friend_id = c.friend_id)
+        WHERE m.id IN (
+          SELECT MAX(mx.id) FROM contacts cx
+          INNER JOIN messages mx ON (mx.user_id = cx.friend_id OR mx.friend_id = cx.friend_id)
+          GROUP BY cx.contact_name
+        )
+        AND c.user_id = ${data.id} AND
         c.contact_name LIKE '%${String(data.keyword).replace(/\\/g, '\\\\')
         .replace(/\$/g, '\\$')
         .replace(/'/g, "\\'")
