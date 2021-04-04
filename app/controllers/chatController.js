@@ -5,7 +5,6 @@ const moment = require('moment')
 
 // import models
 const chats = require('../models/Chat')
-// const users = require('../models/User')
 
 exports.create = async (req, res) => {
   try {
@@ -19,6 +18,8 @@ exports.create = async (req, res) => {
       return response(res, 400, false, 'Failed to send message')
     } else {
       req.socket.emit(`Send_Message_${req.body.friendId}`, req.body)
+      req.socket.emit(`Retrieve_Message_${req.data.id}`, req.body)
+      req.socket.emit(`Retrieve_Message_${req.body.friendId}`, req.body)
       return response(res, 200, true, 'Sucessfully to send message')
     }
   } catch (err) {
@@ -98,6 +99,7 @@ exports.getChatList = async (req, res) => {
     } else {
       const modifiedResults = results.map(item => ({
         ...item,
+        time: moment(item.time).format('HH:mm'),
         picture: process.env.PHOTO_URL.concat(`/${item.picture}`)
       }))
       return response(res, 200, true, 'Successfully to get all chats', modifiedResults, totalData, totalPages, page, req)

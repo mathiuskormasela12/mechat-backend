@@ -79,13 +79,13 @@ class Chat extends Database {
 
   getChatList (data) {
     return new Promise((resolve, reject) => {
-      this.db.query(`
-        SELECT c.contact_name, f.picture, m.message FROM contacts c
+      const sql = this.db.query(`
+        SELECT c.contact_name, f.picture, m.message, m.createdAt AS time FROM contacts c
         INNER JOIN users f ON f.id = c.friend_id
-        INNER JOIN messages m ON (m.user_id = c.friend_id OR m.friend_id = c.friend_id)
+        INNER JOIN messages m ON ((m.user_id = c.friend_id AND m.friend_id = c.user_id) OR (m.friend_id = c.friend_id AND m.user_id = c.user_id))
         WHERE m.id IN (
           SELECT MAX(mx.id) FROM contacts cx
-          INNER JOIN messages mx ON (mx.user_id = cx.friend_id OR mx.friend_id = cx.friend_id)
+          INNER JOIN messages mx ON ((mx.user_id = cx.friend_id AND mx.friend_id = cx.user_id) OR (mx.friend_id = cx.friend_id AND mx.user_id = cx.user_id))
           GROUP BY cx.contact_name
         )
         AND c.user_id = ${data.id} AND
@@ -98,6 +98,7 @@ class Chat extends Database {
         LIMIT ${data.offset}, ${data.limit}
       `,
       (err, results) => {
+        console.log(sql.sql)
         if (err) {
           return reject(err)
         } else {
@@ -112,10 +113,10 @@ class Chat extends Database {
       this.db.query(`
         SELECT COUNT(*) AS count FROM contacts c
         INNER JOIN users f ON f.id = c.friend_id
-        INNER JOIN messages m ON (m.user_id = c.friend_id OR m.friend_id = c.friend_id)
+        INNER JOIN messages m ON ((m.user_id = c.friend_id AND m.friend_id = c.user_id) OR (m.friend_id = c.friend_id AND m.user_id = c.user_id))
         WHERE m.id IN (
           SELECT MAX(mx.id) FROM contacts cx
-          INNER JOIN messages mx ON (mx.user_id = cx.friend_id OR mx.friend_id = cx.friend_id)
+          INNER JOIN messages mx ON ((mx.user_id = cx.friend_id AND mx.friend_id = cx.user_id) OR (mx.friend_id = cx.friend_id AND mx.user_id = cx.user_id))
           GROUP BY cx.contact_name
         )
         AND c.user_id = ${data.id} AND
