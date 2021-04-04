@@ -66,6 +66,7 @@ exports.getAll = async (req, res) => {
     }
   } catch (err) {
     console.log(err)
+    return response(res, 500, false, 'Server Error')
   }
 }
 
@@ -106,5 +107,6 @@ exports.getChatList = async (req, res) => {
     }
   } catch (err) {
     console.log(err)
+    return response(res, 500, false, 'Server Error')
   }
 }
